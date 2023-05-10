@@ -50,7 +50,7 @@ testing {
         }
     }
 }
-version = "0.0.1-SNAPSHOT"
+version = System.getenv("GITHUB_REF_NAME") ?: "1.0.0-SNAPSHOT"
 group = "pw.binom"
 gradlePlugin {
     // Define the plugin
