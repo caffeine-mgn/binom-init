@@ -32,6 +32,8 @@ rootProject.name = "${settings.packageName}"
         )
         File("build.gradle.kts").writeText(
             """
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 plugins {
     kotlin("multiplatform") version "1.8.21"
     id("com.github.johnrengelman.shadow") version "5.2.0"
