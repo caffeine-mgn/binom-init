@@ -11,7 +11,8 @@ plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
     `java-gradle-plugin`
     `maven-publish`
-    id("binom-publish") version "0.1.10"
+    id("binom-publish") version "0.1.11"
+//    id("binom-publish") version "1.0.0-SNAPSHOT"
 
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     kotlin("jvm") version "1.8.21"
