@@ -66,3 +66,12 @@ tasks.named<Task>("check") {
     // Include functionalTest as part of the check lifecycle
     dependsOn(testing.suites.named("functionalTest"))
 }
+
+tasks {
+    val jar by getting(Jar::class) {
+        manifest {
+            this.attributes("Implementation-Title" to "Gradle")
+            this.attributes("Implementation-Version" to "8.1.1")
+        }
+    }
+}

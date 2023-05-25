@@ -153,7 +153,13 @@ tasks {
 
 class BinomInitPlugin : Plugin<DefaultGradle> {
     override fun apply(project: DefaultGradle) {
+        println("Apply kotlin init plugin!---1")
         project.rootProject {
+            it.tasks.create("ololo") {
+                it.doLast {
+                    println("ololo!")
+                }
+            }
             val projectLayoutSetupRegistry = it.serviceOf<ProjectLayoutSetupRegistry>()
             projectLayoutSetupRegistry.add(MyBuildInitializer())
         }

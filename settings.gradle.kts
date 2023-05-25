@@ -7,4 +7,5 @@ pluginManagement {
     }
 }
 rootProject.name = "BinomInit"
-include("init")
+// include(":init")
+include(":cli")
