@@ -10,7 +10,7 @@ repositories {
     maven(url = "https://repo.binom.pw")
 }
 
-val nativeEntryPoint = "aa.bb.main"
+val nativeEntryPoint = "pw.binom.init.main"
 
 fun KotlinNativeTarget.configNative() {
     binaries {
@@ -71,7 +71,7 @@ tasks {
 
     val install by creating(Copy::class) {
         dependsOn(linkReleaseExecutableLinuxX64)
-        this.from("build/bin/linuxX64/debugExecutable/init.kexe")
+        this.from("build/bin/linuxX64/releaseExecutable/cli.kexe")
         into("/home/subochev/.bin")
         rename { "binom-init" }
     }

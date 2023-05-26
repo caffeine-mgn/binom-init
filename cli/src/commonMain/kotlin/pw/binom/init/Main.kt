@@ -1,11 +1,56 @@
 package pw.binom.init
 
 import pw.binom.*
+import pw.binom.io.bufferedWriter
 import pw.binom.io.file.*
+import pw.binom.io.use
+
+fun findExistProject(searchFrom: File): File? {
+    var wd = searchFrom
+    while (true) {
+        val settingsFile = wd.relative("settings.gradle.kts")
+        if (settingsFile.isExist) {
+            if (!settingsFile.isFile) {
+                TODO()
+            }
+            return wd
+        }
+        wd = wd.parent ?: return null
+    }
+}
 
 fun main(args: Array<String>) {
     val rootDir = File(Environment.userDirectory).relative(".binom-init")
     val gradleDir = rootDir.relative("gradle")
+
+    val existProjectDir = findExistProject(Environment.workDirectoryFile)
+    if (existProjectDir != null) {
+        addSubProject(existProjectDir)
+    } else {
+        createNewProject(gradleDir = gradleDir)
+    }
+}
+
+fun addSubProject(projectDirection: File) {
+    if (yesNo(
+            text = "Добавить новый подпроект?",
+            default = YesNoRequest.DEFAULT_YES,
+        ) != true
+    ) {
+        return
+    }
+    val project = readProject() ?: return
+    project.generate(projectDirection.relative(project.name), globalConfig = null)
+    val settingsFile = projectDirection.relative("settings.gradle.kts")
+    settingsFile.openWrite(append = true).also {
+        it.position = it.size
+        it.bufferedWriter().use { output ->
+            output.append("\ninclude(\":${project.name}\")")
+        }
+    }
+}
+
+fun createNewProject(gradleDir: File) {
     val multiProject = yesNo(
         text = "Мультимодульный проект?",
         default = YesNoRequest.DEFAULT_NO,
@@ -24,8 +69,8 @@ fun main(args: Array<String>) {
     val project = if (multiProject) {
         val rootProjectName = text("Введите Название главного проекта", default = Environment.workDirectoryFile.name) {
             require(it.length > 1) { "Имя проекта не может быть пустым" }
-            require("." !in it) { "В имини проекта не допускается символ точки" }
-            require(" " !in it) { "В имини проекта не допускается символ пробела" }
+            require("." !in it) { "В имени проекта не допускается символ точки" }
+            require(" " !in it) { "В имени проекта не допускается символ пробела" }
         } ?: return
         val projects = ArrayList<Project>()
         do {
@@ -80,8 +125,6 @@ fun main(args: Array<String>) {
     gradleDir.relative("wrapper/gradle-wrapper.properties")
         .takeIfExist()
         ?.copyInto(rootDirectory.relative("gradle/wrapper/gradle-wrapper.properties"))
-
-    // Do nothing
 }
 
 fun readProject(): Project? {
@@ -102,24 +145,29 @@ fun readProject(): Project? {
         require("-" !in it) { "В имини пакета не допускается символ \"-\"" }
         require(" " !in it) { "В имини пакета не допускается символ пробела" }
     } ?: return null
-    val libs = ArrayList<Library>()
-    var network = false
-    if (yesNo(text = "Добавить библиотеку работы с файлами?", default = YesNoRequest.DEFAULT_NO) == true) {
-        libs += Library("pw.binom.io", "file", "1.0.0-SNAPSHOT")
-    }
-    if (yesNo(text = "Добавить библиотеку HTTP сервер?", default = YesNoRequest.DEFAULT_NO) == true) {
-        libs += Library("pw.binom.io", "httpServer", "1.0.0-SNAPSHOT")
-        network = true
-    }
-    if (yesNo(text = "Добавить библиотеку HTTP клиент?", default = YesNoRequest.DEFAULT_NO) == true) {
-        libs += Library("pw.binom.io", "httpClient", "1.0.0-SNAPSHOT")
-        network = true
-    }
-    if (!network && yesNo(text = "Добавить библиотеку работы с сетью?", default = YesNoRequest.DEFAULT_NO) == true) {
-        libs += Library("pw.binom.io", "network", "1.0.0-SNAPSHOT")
-    }
+//    val libs = ArrayList<Library>()
+//    var network = false
+//    if (yesNo(text = "Добавить библиотеку работы с файлами?", default = YesNoRequest.DEFAULT_NO) == true) {
+//        libs += Library("pw.binom.io", "file", "1.0.0-SNAPSHOT")
+//    }
+//    if (yesNo(text = "Добавить библиотеку HTTP сервер?", default = YesNoRequest.DEFAULT_NO) == true) {
+//        libs += Library("pw.binom.io", "httpServer", "1.0.0-SNAPSHOT")
+//        network = true
+//    }
+//    if (yesNo(text = "Добавить библиотеку HTTP клиент?", default = YesNoRequest.DEFAULT_NO) == true) {
+//        libs += Library("pw.binom.io", "httpClient", "1.0.0-SNAPSHOT")
+//        network = true
+//    }
+//    if (!network && yesNo(text = "Добавить библиотеку работы с сетью?", default = YesNoRequest.DEFAULT_NO) == true) {
+//        libs += Library("pw.binom.io", "network", "1.0.0-SNAPSHOT")
+//    }
+    val selected = multiSelect(
+        query = "Какие библиотеки добавить?",
+        items = BinomLibraries.libs.toList(),
+        toString = { it -> it.name },
+    ) ?: return null
     val targets = multiSelect(
-        query = "",
+        query = "Введите цели сборки",
         items = Targets.values().toList(),
     ) ?: return null
     return Project(
@@ -127,6 +175,6 @@ fun readProject(): Project? {
         packageName = packageName,
         kind = kind,
         targets = targets,
-        libs = libs,
+        libs = selected.map { it.library },
     )
 }

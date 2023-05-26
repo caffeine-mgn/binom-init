@@ -12,16 +12,14 @@ class MultiProject(override val config: GlobalConfig, val projects: List<Project
             }
         }
         projects.forEach { project ->
-            val projectDirectory = rootDirectory.relative(project.name)
-            projectDirectory.mkdirs()
-            project.generateSources(projectDirectory)
-            projectDirectory.relative("build.gradle.kts").openWrite().bufferedWriter().use { output ->
-                project.generateBuildKts(output = output, globalConfig = null)
-            }
+            project.generate(projectDirectory = rootDirectory.relative(project.name), globalConfig = null)
         }
 
         rootDirectory.relative("build.gradle.kts").openWrite().bufferedWriter().use { output ->
             output.write {
+                "plugins" {
+                    +"kotlin(\"multiplatform\") version \"1.8.21\" apply false"
+                }
                 "allprojects" {
                     "repositories" {
                         if (config.useLocalRepository) {

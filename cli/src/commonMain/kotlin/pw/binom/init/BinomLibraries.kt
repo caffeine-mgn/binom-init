@@ -58,7 +58,7 @@ object BinomLibraries {
     private val xmlSerialization = lib("xml-serialization")
     private val xmlXsd = lib("xsd")
 
-    private val libs = setOf(
+    val libs = setOf(
         CompositLibrary(name = "Колекции", library = collections, dependencies = listOf(atomic)),
         CompositLibrary(name = "Сжатие", library = compression, dependencies = listOf(core, crc)),
         CompositLibrary(
@@ -82,7 +82,11 @@ object BinomLibraries {
             library = dbPostgresqlAsync,
             dependencies = listOf(core, db, file, concurrency, thread),
         ),
-        CompositLibrary(name = "Работа с файлами", library = file, dependencies = listOf(core, charset)),
+        CompositLibrary(
+            name = "Работа с файлами",
+            library = file,
+            dependencies = listOf(core, charset),
+        ),
         CompositLibrary(
             name = "HTTP Сервер",
             library = httpServer,
@@ -93,7 +97,11 @@ object BinomLibraries {
             library = httpServer,
             dependencies = listOf(core, network, ssl, compression, http),
         ),
-        CompositLibrary(name = "Логирование", library = httpServer, dependencies = listOf(core, date)),
+        CompositLibrary(
+            name = "Логирование",
+            library = httpServer,
+            dependencies = listOf(core, date),
+        ),
         CompositLibrary(
             name = "S3 клиент",
             library = s3,

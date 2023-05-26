@@ -12,11 +12,12 @@ class SingleProject(override val config: GlobalConfig, val project: Project) : A
         rootDirectory.relative("settings.gradle.kts").openWrite().bufferedWriter().use { output ->
             baseSettingsPart(output)
         }
-        rootDirectory.relative("build.gradle.kts").openWrite().bufferedWriter().use { output ->
-            project.generateBuildKts(
-                output = output,
-                globalConfig = config,
-            )
-        }
+        project.generate(projectDirectory = rootDirectory, globalConfig = config)
+//        rootDirectory.relative("build.gradle.kts").openWrite().bufferedWriter().use { output ->
+//            project.generateBuildKts(
+//                output = output,
+//                globalConfig = config,
+//            )
+//        }
     }
 }

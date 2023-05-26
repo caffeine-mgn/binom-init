@@ -9,8 +9,17 @@ class Project(
     val packageName: String,
     val kind: Kind,
     val targets: Set<Targets>,
-    val libs: List<Library>,
+    val libs: Collection<Library>,
 ) {
+
+    fun generate(projectDirectory: File, globalConfig: GlobalConfig?) {
+        projectDirectory.mkdirs()
+        generateSources(projectDirectory)
+        projectDirectory.relative("build.gradle.kts").openWrite().bufferedWriter().use { output ->
+            generateBuildKts(output = output, globalConfig = globalConfig)
+        }
+    }
+
     private val tab = "    "
     fun generateSources(projectDirectory: File) {
         val packageDir = packageName.replace('.', '/')
@@ -19,6 +28,9 @@ class Project(
         if (kind == Kind.APPLICATION) {
             baseSourcePath.relative("Main.kt").openWrite().bufferedWriter().use { output ->
                 output.write {
+                    if (packageName.isNotEmpty()) {
+                        output.append("package ").appendLine(packageName).appendLine()
+                    }
                     "fun main(args: Array<String>)" {
                         +"// Your code here"
                     }
@@ -32,11 +44,12 @@ class Project(
                 jvmSourcePath.mkdirs()
                 jvmSourcePath.relative("Main.kt").openWrite().bufferedWriter().use { output ->
                     if (packageName.isNotEmpty()) {
-                        output.append("package ").appendLine(packageName)
+                        output.append("package ").appendLine(packageName).appendLine()
                     }
                     output.write {
                         "object MainJvm" {
                             +"@JvmStatic"
+                            +"@JvmName(\"main\")"
                             "fun mainJvm(args: Array<String>)" {
                                 +"main(args)"
                             }
@@ -54,90 +67,96 @@ class Project(
     }
 
     fun generateBuildKts(output: Appendable, globalConfig: GlobalConfig?) {
-        output.appendLine("plugins {")
-            .appendLine("${tab}kotlin(\"multiplatform\") version \"1.8.21\"")
-        if (kind == Kind.APPLICATION && Targets.JVM in targets) {
-            output.appendLine("${tab}id(\"com.github.johnrengelman.shadow\") version \"5.2.0\"")
-        }
-        output.appendLine("}")
-        if (kind == Kind.APPLICATION) {
-            val entryPoint = if (packageName.isEmpty()) {
-                "main"
-            } else {
-                "$packageName.main"
+        output.write {
+            "plugins" {
+                if (globalConfig == null) {
+                    +"kotlin(\"multiplatform\")"
+                } else {
+                    +"kotlin(\"multiplatform\") version \"1.8.21\""
+                }
+                if (kind == Kind.APPLICATION && Targets.JVM in targets) {
+                    +"id(\"com.github.johnrengelman.shadow\") version \"5.2.0\""
+                }
             }
-            output.appendLine("val nativeEntryPoint = \"$entryPoint\"")
-        }
-        output.appendLine("kotlin {")
-        targets.forEach {
-            fun native() = if (kind == Kind.LIBRARY) {
-                "()"
-            } else {
-                " {\n" +
-                    "${tab}${tab}binaries {\n" +
-                    "${tab}${tab}${tab}executable {\n" +
-                    "${tab}${tab}${tab}${tab}entryPoint = nativeEntryPoint\n" +
-                    "${tab}${tab}$tab}\n" +
-                    "${tab}$tab}\n" +
-                    "$tab}"
+            if (kind == Kind.APPLICATION) {
+                val entryPoint = if (packageName.isEmpty()) {
+                    "main"
+                } else {
+                    "$packageName.main"
+                }
+                +"val nativeEntryPoint = \"$entryPoint\""
             }
-            when (it) {
-                Targets.JS -> {
-                    output.append("${tab}js(IR)")
-                    when (kind) {
-                        Kind.APPLICATION -> {
-                            output.appendLine(" {")
-                                .appendLine("${tab}${tab}browser()")
-                                .appendLine("${tab}${tab}binaries.executable()")
-                                .appendLine("$tab}")
+
+            "kotlin" {
+                targets.forEach {
+                    fun native(name: String) = if (kind == Kind.LIBRARY) {
+                        +"$name()"
+                    } else {
+                        name {
+                            "binaries" {
+                                "executable" {
+                                    +"entryPoint = nativeEntryPoint"
+                                }
+                            }
+                        }
+                    }
+                    when (it) {
+                        Targets.JS -> {
+                            when (kind) {
+                                Kind.APPLICATION -> {
+                                    "js(IR)" {
+                                        +"browser()"
+                                        +"binaries.executable()"
+                                    }
+                                }
+
+                                Kind.LIBRARY -> +"js(IR)"
+                            }
                         }
 
-                        Kind.LIBRARY -> output.appendLine()
+                        Targets.JVM -> +"jvm()"
+                        Targets.LINUX_X64 -> native("linuxX64")
+                        Targets.MINGW_X64 -> native("mingwX64")
+
+                        else -> TODO()
                     }
                 }
 
-                Targets.JVM -> output.appendLine("${tab}jvm()")
-                Targets.LINUX_X64 -> output.append("${tab}linuxX64").appendLine(native())
-                Targets.MINGW_X64 -> output.append("${tab}mingwX64").appendLine(native())
-
-                else -> TODO()
+                "sourceSets" {
+                    "val commonMain by getting" {
+                        "dependencies" {
+                            +"api(kotlin(\"stdlib\"))"
+                            libs.forEach {
+                                +"api(\"${it.group}:${it.artifact}:${it.version}\")"
+                            }
+                        }
+                    }
+                    "val commonTest by getting" {
+                        "dependencies" {
+                            +"implementation(kotlin(\"test-common\"))"
+                            +"implementation(kotlin(\"test-annotations-common\"))"
+                        }
+                    }
+                }
             }
-        }
-        output.appendLine("${tab}sourceSets {")
-            .appendLine("${tab}${tab}val commonMain by getting {")
-            .appendLine("${tab}${tab}${tab}dependencies {")
-            .appendLine("${tab}${tab}${tab}${tab}api(kotlin(\"stdlib\"))")
-        libs.forEach {
-            output.appendLine("${tab}${tab}${tab}${tab}api(\"${it.group}:${it.artifact}:${it.version}\")")
-        }
-        output.appendLine("${tab}${tab}$tab}")
-            .appendLine("${tab}$tab}")
-            .appendLine("${tab}${tab}val commonTest by getting {")
-            .appendLine("${tab}${tab}${tab}dependencies {")
-            .appendLine("${tab}${tab}${tab}${tab}implementation(kotlin(\"test-common\"))")
-            .appendLine("${tab}${tab}${tab}${tab}implementation(kotlin(\"test-annotations-common\"))")
-            .appendLine("${tab}${tab}$tab}")
-            .appendLine("${tab}$tab}")
-
-        output.appendLine("$tab}")
-        output.appendLine("}")
-        if (kind == Kind.APPLICATION && Targets.JVM in targets) {
-            val mainClass = if (packageName.isEmpty()) {
-                "JvmMain"
-            } else {
-                "$packageName.JvmMain"
+            if (kind == Kind.APPLICATION && Targets.JVM in targets) {
+                val mainClass = if (packageName.isEmpty()) {
+                    "JvmMain"
+                } else {
+                    "$packageName.JvmMain"
+                }
+                "tasks" {
+                    +"val jvmJar by getting(Jar::class)"
+                    "val shadowJar by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class)" {
+                        +"from(jvmJar.archiveFile)"
+                        +"group = \"build\""
+                        +"configurations = listOf(project.configurations[\"jvmRuntimeClasspath\"])"
+                        "manifest" {
+                            +"attributes(\"Main-Class\" to \"$mainClass\")"
+                        }
+                    }
+                }
             }
-            output.appendLine("tasks {")
-                .appendLine("${tab}val jvmJar by getting(Jar::class)")
-                .appendLine("${tab}val shadowJar by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {")
-                .appendLine("${tab}${tab}from(jvmJar.archiveFile)")
-                .appendLine("${tab}${tab}group = \"build\"")
-                .appendLine("${tab}${tab}configurations = listOf(project.configurations[\"jvmRuntimeClasspath\"])")
-                .appendLine("${tab}${tab}manifest {")
-                .appendLine("${tab}${tab}${tab}attributes(\"Main-Class\" to \"$mainClass\")")
-                .appendLine("${tab}$tab}")
-                .appendLine("$tab}")
-                .appendLine("}")
         }
     }
 }

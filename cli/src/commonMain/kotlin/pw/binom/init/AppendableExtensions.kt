@@ -23,7 +23,7 @@ class Writer(val tabCount: Int, val output: Appendable) {
     }
 
     operator fun String.invoke(func: Writer.() -> Unit) {
-        output.append(tab).append(this).append(" {")
+        output.append(tab).append(this).appendLine(" {")
         func(Writer(tabCount = tabCount + 1, output = output))
         +"}"
     }
