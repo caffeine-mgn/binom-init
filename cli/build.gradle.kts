@@ -55,12 +55,12 @@ tasks {
         group = "build"
         configurations = listOf(project.configurations["jvmRuntimeClasspath"])
         exclude(
-            "META-INF/*.SF",
-            "META-INF/*.DSA",
-            "META-INF/*.RSA",
-            "META-INF/*.txt",
-            "META-INF/NOTICE",
-            "LICENSE",
+                "META-INF/*.SF",
+                "META-INF/*.DSA",
+                "META-INF/*.RSA",
+                "META-INF/*.txt",
+                "META-INF/NOTICE",
+                "LICENSE",
         )
         manifest {
             attributes("Main-Class" to "pw.binom.init.JvmMain")
@@ -68,11 +68,31 @@ tasks {
     }
 
     val linkReleaseExecutableLinuxX64 by getting
+    val linkReleaseExecutableMingwX64 by getting
 
-    val install by creating(Copy::class) {
+    val isLinux = "nix" in System.getProperty("os.name").lowercase()
+    val isWindows = "windows" in System.getProperty("os.name").lowercase()
+
+    val installLinux by creating(Copy::class) {
+        this.onlyIf { isLinux }
         dependsOn(linkReleaseExecutableLinuxX64)
         this.from("build/bin/linuxX64/releaseExecutable/cli.kexe")
-        into("/home/subochev/.bin")
+        into("${System.getProperty("user.home")}/.bin")
         rename { "binom-init" }
+    }
+
+    val binPath = if (hasProperty("bin-path")) property("bin-path") as String? else null
+
+    val installWindows by creating(Copy::class) {
+        this.onlyIf { isWindows && binPath != null }
+        dependsOn(linkReleaseExecutableLinuxX64)
+        this.from("build/bin/mingwX64/releaseExecutable/cli.exe")
+        into(binPath)
+        rename { "binom-init.exe" }
+    }
+
+    val install by creating {
+        dependsOn(installLinux)
+        dependsOn(installWindows)
     }
 }
