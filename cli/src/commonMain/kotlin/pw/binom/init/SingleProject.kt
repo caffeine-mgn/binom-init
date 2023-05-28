@@ -7,7 +7,10 @@ import pw.binom.io.file.relative
 import pw.binom.io.use
 
 class SingleProject(override val config: GlobalConfig, val project: Project) : AbstractProject() {
+    override fun getAllLibs() = project.libs
+
     override fun generate(rootDirectory: File) {
+        super.generate(rootDirectory)
         project.generateSources(rootDirectory)
         rootDirectory.relative("settings.gradle.kts").openWrite().bufferedWriter().use { output ->
             baseSettingsPart(output)

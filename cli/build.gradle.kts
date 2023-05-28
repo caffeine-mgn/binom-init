@@ -85,7 +85,7 @@ tasks {
 
     val installWindows by creating(Copy::class) {
         this.onlyIf { isWindows && binPath != null }
-        dependsOn(linkReleaseExecutableLinuxX64)
+        dependsOn(linkReleaseExecutableMingwX64)
         this.from("build/bin/mingwX64/releaseExecutable/cli.exe")
         into(binPath)
         rename { "binom-init.exe" }

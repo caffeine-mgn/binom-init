@@ -4,7 +4,10 @@ import pw.binom.io.*
 import pw.binom.io.file.*
 
 class MultiProject(override val config: GlobalConfig, val projects: List<Project>) : AbstractProject() {
+    override fun getAllLibs() = projects.flatMap { it.libs }.distinct()
+
     override fun generate(rootDirectory: File) {
+        super.generate(rootDirectory)
         rootDirectory.relative("settings.gradle.kts").openWrite().bufferedWriter().use { output ->
             baseSettingsPart(output)
             projects.forEach { project ->

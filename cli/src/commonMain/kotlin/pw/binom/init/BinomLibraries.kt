@@ -3,9 +3,10 @@ package pw.binom.init
 import pw.binom.url.toURL
 
 object BinomLibraries {
+
     val repository = Repository.UrlRepository("https://repo.binom.pw".toURL())
     private const val group = "pw.binom.io"
-    private const val version = "1.0.0-SNAPSHOT"
+    private val version = Version(family = "BINOM_VERSION", version = "1.0.0-SNAPSHOT")
     private fun lib(name: String) = Library(group = group, version = version, artifact = name, repository = repository)
     private val atomic = lib("atomic")
     private val binomCoroutines = lib("binom-coroutines")

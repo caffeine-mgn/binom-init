@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Install",
+            "type": "gradle",
+            "workingDir": "$PROJECT_DIR$",
+            "tasks": ["install"],
+            "args": [""],
+            "initScripts": {"flmapper":"ext.mapPath = { path -> null }"},
+        },
+        {
+            "name": "Install - Windows",
+            "type": "gradle",
+            "workingDir": "$PROJECT_DIR$",
+            "tasks": ["installWindows"],
+            "args": [""],
+            "initScripts": {"flmapper":"ext.mapPath = { path -> null }"},
+        },
+    ]
+}

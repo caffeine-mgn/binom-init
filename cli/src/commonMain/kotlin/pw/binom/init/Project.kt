@@ -5,11 +5,11 @@ import pw.binom.io.file.*
 import pw.binom.io.use
 
 class Project(
-    val name: String,
-    val packageName: String,
-    val kind: Kind,
-    val targets: Set<Targets>,
-    val libs: Collection<Library>,
+        val name: String,
+        val packageName: String,
+        val kind: Kind,
+        val targets: Set<Targets>,
+        val libs: Collection<Library>,
 ) {
 
     fun generate(projectDirectory: File, globalConfig: GlobalConfig?) {
@@ -114,7 +114,10 @@ class Project(
                             }
                         }
 
-                        Targets.JVM -> +"jvm()"
+                        Targets.JVM -> "jvm" {
+                            +"jvmToolchain(pw.binom.Versions.JVM_VERSION)"
+                        }
+
                         Targets.LINUX_X64 -> native("linuxX64")
                         Targets.MINGW_X64 -> native("mingwX64")
 
