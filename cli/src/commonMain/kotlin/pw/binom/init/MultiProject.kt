@@ -3,8 +3,14 @@ package pw.binom.init
 import pw.binom.io.*
 import pw.binom.io.file.*
 
-class MultiProject(override val config: GlobalConfig, val projects: List<Project>) : AbstractProject() {
+class MultiProject(
+    override val config: GlobalConfig,
+    override val projects: List<Project>,
+    override val kotlinVersion: Version,
+) : AbstractProject() {
     override fun getAllLibs() = projects.flatMap { it.libs }.distinct()
+    override fun getAllRepositories() =
+        (projects.flatMap { it.libs }.map { it.repository } + config.repositories).distinct()
 
     override fun generate(rootDirectory: File) {
         super.generate(rootDirectory)
@@ -21,16 +27,35 @@ class MultiProject(override val config: GlobalConfig, val projects: List<Project
         rootDirectory.relative("build.gradle.kts").openWrite().bufferedWriter().use { output ->
             output.write {
                 "plugins" {
-                    +"kotlin(\"multiplatform\") version \"1.8.21\" apply false"
+                    pluginsInSection.forEach {
+                        if ((it as? Plugin.KotlinPlugin)?.name == "multiplatform") {
+                            return@forEach
+                        }
+                        it.write(
+                            output = this,
+                            withVersion = true,
+                            apply = false,
+                        )
+                    }
+                }
+                if (pluginsInClasspath.isNotEmpty()) {
+                    "buildscript" {
+                        "repositories" {
+                            pluginsInClasspath.forEach {
+                                it.repository?.write(this)
+                            }
+                        }
+                        "dependencies" {
+                            pluginsInClasspath.forEach {
+                                it.writeClasspath(this)
+                            }
+                        }
+                    }
                 }
                 "allprojects" {
                     "repositories" {
-                        if (config.useLocalRepository) {
-                            +"mavenLocal()"
-                        }
-                        +"mavenCentral()"
-                        if (config.useBinomRepository) {
-                            +"maven(url = \"https://repo.binom.pw\")"
+                        getAllRepositories().forEach {
+                            it.write(this)
                         }
                     }
                 }

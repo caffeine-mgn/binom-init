@@ -1,8 +1,16 @@
 package pw.binom.init
 
-fun <T : Any> multiSelect(query: String, items: List<T>, selected: List<T> = emptyList(), toString: (T) -> String = { it.toString() }): Set<T>? {
+import pw.binom.console.Terminal
+
+fun <T : Any> multiSelect(
+    query: String,
+    items: List<T>,
+    selected: List<T> = emptyList(),
+    toString: (T) -> String = { it.toString() },
+): Set<T>? {
     val selectedSet = HashSet(selected)
     while (true) {
+        Terminal.clear()
         println(query)
         items.forEachIndexed { index, value ->
             print("${index + 1}. ")
@@ -44,6 +52,7 @@ enum class YesNoRequest {
 
 fun text(query: String, trim: Boolean = true, default: String? = null, validator: (String) -> Unit = {}): String? {
     while (true) {
+        Terminal.clear()
         print(query)
         if (default != null) {
             println(" (default: $default)")
@@ -69,6 +78,7 @@ fun text(query: String, trim: Boolean = true, default: String? = null, validator
 
 fun yesNo(text: String, default: YesNoRequest): Boolean? {
     while (true) {
+        Terminal.clear()
         print(text)
         val answerDescription = when (default) {
             YesNoRequest.DEFAULT_YES -> " (Y/n)"
@@ -96,6 +106,7 @@ fun yesNo(text: String, default: YesNoRequest): Boolean? {
 
 fun <T : Any> selector(query: String, items: List<T>, toString: (T) -> String = { it.toString() }): T? {
     while (true) {
+        Terminal.clear()
         println(query)
         items.forEachIndexed { index, value ->
             println("${index + 1}. ${toString(value)}")

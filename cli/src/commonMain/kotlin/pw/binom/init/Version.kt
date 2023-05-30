@@ -6,5 +6,5 @@ data class Version(val family: String, val version: String) {
     val constName
         get() = "${family.uppercase()}_VERSION"
     val variableName
-        get()="${family.lowercase()}Version"
+        get() = "${family.lowercase()}Version"
 }

@@ -5,11 +5,12 @@ import pw.binom.io.file.*
 import pw.binom.io.use
 
 class Project(
-        val name: String,
-        val packageName: String,
-        val kind: Kind,
-        val targets: Set<Targets>,
-        val libs: Collection<Library>,
+    val name: String,
+    val packageName: String,
+    val kind: Kind,
+    val targets: Set<Targets>,
+    val libs: Collection<Library>,
+    val plugins: Collection<Plugin>,
 ) {
 
     fun generate(projectDirectory: File, globalConfig: GlobalConfig?) {
@@ -69,14 +70,24 @@ class Project(
     fun generateBuildKts(output: Appendable, globalConfig: GlobalConfig?) {
         output.write {
             "plugins" {
-                if (globalConfig == null) {
-                    +"kotlin(\"multiplatform\")"
-                } else {
-                    +"kotlin(\"multiplatform\") version \"1.8.21\""
+                plugins.mapNotNull { it as? Plugin.PluginSection }.forEach {
+                    it.write(
+                        output = this,
+                        withVersion = globalConfig != null,
+                        apply = true,
+                    )
                 }
-                if (kind == Kind.APPLICATION && Targets.JVM in targets) {
-                    +"id(\"com.github.johnrengelman.shadow\") version \"5.2.0\""
-                }
+//                if (globalConfig==null){
+//
+//                }
+//                if (globalConfig == null) {
+//                    +"kotlin(\"multiplatform\")"
+//                } else {
+//                    +"kotlin(\"multiplatform\") version \"1.8.21\""
+//                }
+//                if (kind == Kind.APPLICATION && Targets.JVM in targets) {
+//                    +"id(\"com.github.johnrengelman.shadow\") version \"5.2.0\""
+//                }
             }
             if (kind == Kind.APPLICATION) {
                 val entryPoint = if (packageName.isEmpty()) {
@@ -130,7 +141,7 @@ class Project(
                         "dependencies" {
                             +"api(kotlin(\"stdlib\"))"
                             libs.forEach {
-                                +"api(\"${it.group}:${it.artifact}:${it.version}\")"
+                                +"api(\"${it.group}:${it.artifact}:\${pw.binom.Versions.${it.version.constName}}\")"
                             }
                         }
                     }

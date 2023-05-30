@@ -5,4 +5,5 @@ data class Library(
     val artifact: String,
     val version: Version,
     val repository: Repository,
+    val plugins: List<Plugin>,
 )

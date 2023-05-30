@@ -42,6 +42,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib"))
                 api("pw.binom.io:file:1.0.0-SNAPSHOT")
+                api("pw.binom.io:console:1.0.0-SNAPSHOT")
             }
         }
     }
@@ -55,12 +56,12 @@ tasks {
         group = "build"
         configurations = listOf(project.configurations["jvmRuntimeClasspath"])
         exclude(
-                "META-INF/*.SF",
-                "META-INF/*.DSA",
-                "META-INF/*.RSA",
-                "META-INF/*.txt",
-                "META-INF/NOTICE",
-                "LICENSE",
+            "META-INF/*.SF",
+            "META-INF/*.DSA",
+            "META-INF/*.RSA",
+            "META-INF/*.txt",
+            "META-INF/NOTICE",
+            "LICENSE",
         )
         manifest {
             attributes("Main-Class" to "pw.binom.init.JvmMain")
@@ -70,7 +71,7 @@ tasks {
     val linkReleaseExecutableLinuxX64 by getting
     val linkReleaseExecutableMingwX64 by getting
 
-    val isLinux = "nix" in System.getProperty("os.name").lowercase()
+    val isLinux = System.getProperty("os.name").lowercase().let { "nix" in it || "linux" in it }
     val isWindows = "windows" in System.getProperty("os.name").lowercase()
 
     val installLinux by creating(Copy::class) {

@@ -6,9 +6,11 @@ import pw.binom.io.file.openWrite
 import pw.binom.io.file.relative
 import pw.binom.io.use
 
-class SingleProject(override val config: GlobalConfig, val project: Project) : AbstractProject() {
+class SingleProject(override val config: GlobalConfig, val project: Project, override val kotlinVersion: Version) : AbstractProject() {
     override fun getAllLibs() = project.libs
+    override fun getAllRepositories() = (config.repositories + project.plugins.map { it.repository }).filterNotNull().toSet()
 
+    override val projects: Collection<Project> = listOf(project)
     override fun generate(rootDirectory: File) {
         super.generate(rootDirectory)
         project.generateSources(rootDirectory)
