@@ -54,11 +54,12 @@ sealed interface Plugin {
         val name: String,
         override val version: Version,
         override val repository: Repository = Repository.MAVEN_CENTRAL,
+        val embedded: Boolean,
     ) : PluginSection {
         override fun write(output: Writer, withVersion: Boolean, apply: Boolean) {
             val sb = StringBuilder()
             sb.append("kotlin(\"").append(name).append("\")")
-            if (withVersion) {
+            if (withVersion && !embedded) {
                 sb.append(" version \"").append(version.version).append("\"")
             }
             if (!apply) {

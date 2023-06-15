@@ -85,10 +85,11 @@ tasks {
     val binPath = if (hasProperty("bin-path")) property("bin-path") as String? else null
 
     val installWindows by creating(Copy::class) {
-        this.onlyIf { isWindows && binPath != null }
+        this.onlyIf { isWindows /*&& binPath != null*/ }
         dependsOn(linkReleaseExecutableMingwX64)
         this.from("build/bin/mingwX64/releaseExecutable/cli.exe")
-        into(binPath)
+        val binDir = binPath?.let { File(it) } ?: File(System.getProperty("user.home")).resolve("bin")
+        into(binDir)
         rename { "binom-init.exe" }
     }
 

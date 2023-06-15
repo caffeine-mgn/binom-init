@@ -27,7 +27,11 @@ val shadowPlugin = Plugin.IdPlugin(
     id = "com.github.johnrengelman.shadow",
     version = Version("shadow", version = "5.2.0"),
 )
-val kotlinMultiplatformPlugin = Plugin.KotlinPlugin(name = "multiplatform", version = kotlinVersion)
+val kotlinMultiplatformPlugin = Plugin.KotlinPlugin(
+    name = "multiplatform",
+    version = kotlinVersion,
+    embedded = true,
+)
 val kotlinSerializationPlugin = Plugin.IdPlugin(
     id = "kotlinx-serialization",
     version = kotlinVersion,
@@ -71,6 +75,8 @@ fun createNewProject(gradleDir: File) {
     ) ?: return
 
     val repository = HashSet<Repository>()
+    repository += Repository.MAVEN_CENTRAL
+    repository += Repository.MAVEN_LOCAL
 
 //    val useBinomRepository = yesNo(
 //        text = "Использовать репозиторий repo.binom.pw?",

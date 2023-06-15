@@ -67,6 +67,9 @@ class Project(
         }
     }
 
+    private fun getAllRepositories() =
+        libs.map { it.repository }.distinct()
+
     fun generateBuildKts(output: Appendable, globalConfig: GlobalConfig?) {
         output.write {
             "plugins" {
@@ -168,6 +171,14 @@ class Project(
                         "manifest" {
                             +"attributes(\"Main-Class\" to \"$mainClass\")"
                         }
+                    }
+                }
+            }
+            if (globalConfig != null) {
+                "repositories" {
+                    val repos = (globalConfig.repositories + getAllRepositories()).distinct()
+                    repos.forEach {
+                        it.write(this)
                     }
                 }
             }
