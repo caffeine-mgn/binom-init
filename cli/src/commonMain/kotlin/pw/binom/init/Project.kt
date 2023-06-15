@@ -129,7 +129,9 @@ class Project(
                         }
 
                         Targets.JVM -> "jvm" {
-                            +"jvmToolchain(pw.binom.Versions.JVM_VERSION)"
+                            "compilations.all" {
+                                +"kotlinOptions.jvmTarget = \"1.8\""
+                            }
                         }
 
                         Targets.LINUX_X64 -> native("linuxX64")

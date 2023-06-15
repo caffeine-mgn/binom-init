@@ -11,7 +11,7 @@ fun Appendable.write(func: Writer.() -> Unit) {
 
 class Writer(val tabCount: Int, val output: Appendable) {
     private val tab = run {
-        val sb = StringBuilder(tabCount * 2)
+        val sb = StringBuilder(tabCount * 4)
         repeat(tabCount) {
             sb.append("  ")
         }

@@ -36,7 +36,11 @@ kotlin {
     macosArm64 {
         configNative()
     }
-    jvm()
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -85,7 +89,7 @@ tasks {
     val binPath = if (hasProperty("bin-path")) property("bin-path") as String? else null
 
     val installWindows by creating(Copy::class) {
-        this.onlyIf { isWindows /*&& binPath != null*/ }
+        this.onlyIf { isWindows }
         dependsOn(linkReleaseExecutableMingwX64)
         this.from("build/bin/mingwX64/releaseExecutable/cli.exe")
         val binDir = binPath?.let { File(it) } ?: File(System.getProperty("user.home")).resolve("bin")
