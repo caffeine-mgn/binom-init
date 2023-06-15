@@ -34,13 +34,10 @@ fun <T : Any> multiSelect(
         }
         val item = items[num - 1]
         if (item in selectedSet) {
-            println("exist")
             selectedSet -= item
         } else {
-            println("not exist")
             selectedSet += item
         }
-        println("item: $item, selectedSet=$selectedSet")
     }
 }
 
