@@ -1,6 +1,7 @@
 package pw.binom.init
 
 import pw.binom.*
+import pw.binom.console.Terminal
 import pw.binom.io.bufferedWriter
 import pw.binom.io.file.*
 import pw.binom.io.use
@@ -22,7 +23,7 @@ fun findExistProject2(searchFrom: File): File? {
     }
 }
 
-private val kotlinVersion = Version("kotlin", "1.8.21")
+private val kotlinVersion = Version("kotlin", "1.9.20")
 val shadowPlugin = Plugin.IdPlugin(
     id = "com.github.johnrengelman.shadow",
     version = Version("shadow", version = "5.2.0"),
@@ -57,7 +58,7 @@ fun addSubProject(projectDirection: File) {
     ) {
         return
     }
-    val project = readProject() ?: return
+    val project = readProject(emptyList()) ?: return
     project.generate(projectDirection.relative(project.name), globalConfig = null)
     val settingsFile = projectDirection.relative("settings.gradle.kts")
     settingsFile.openWrite(append = true).also {
@@ -69,6 +70,7 @@ fun addSubProject(projectDirection: File) {
 }
 
 fun createNewProject(gradleDir: File) {
+    Terminal.clear()
     val multiProject = yesNo(
         text = "Мультимодульный проект?",
         default = YesNoRequest.DEFAULT_NO,
@@ -92,6 +94,7 @@ fun createNewProject(gradleDir: File) {
 //    }
     repository += Repository.MAVEN_CENTRAL
     val project = if (multiProject) {
+        Terminal.clear()
         val rootProjectName = text("Введите Название главного проекта", default = Environment.workDirectoryFile.name) {
             require(it.length > 1) { "Имя проекта не может быть пустым" }
             require("." !in it) { "В имени проекта не допускается символ точки" }
@@ -99,8 +102,14 @@ fun createNewProject(gradleDir: File) {
         } ?: return
         val projects = ArrayList<Project>()
         do {
-            val project = readProject() ?: break
+            val project = readProject(projects) ?: break
             projects += project
+            Terminal.clear()
+            println("Созданные проекты:")
+            projects.forEach {
+                println("${it.name} (${it.packageName})")
+            }
+            println()
             val createMore = yesNo(text = "Создать еще проект?", default = YesNoRequest.DEFAULT_NO) ?: return
             if (!createMore) {
                 break
@@ -115,7 +124,7 @@ fun createNewProject(gradleDir: File) {
             kotlinVersion = kotlinVersion,
         )
     } else {
-        val project = readProject() ?: return
+        val project = readProject(emptyList()) ?: return
         SingleProject(
             config = GlobalConfig(
                 rootName = project.name,
@@ -152,20 +161,33 @@ fun createNewProject(gradleDir: File) {
         ?.copyInto(rootDirectory.relative("gradle/wrapper/gradle-wrapper.properties"))
 }
 
-fun readProject(): Project? {
+fun readProject(otherProjects: List<Project>): Project? {
+    fun init() {
+        Terminal.clear()
+        if (otherProjects.isNotEmpty()) {
+            println("Созданные проекты:")
+            otherProjects.forEach {
+                println("${it.name} (${it.packageName})")
+            }
+            println()
+        }
+    }
+    init()
     val kind = selector(query = "Выберите тип проекта", items = Kind.values().toList()) {
         when (it) {
             Kind.APPLICATION -> "Приложение"
             Kind.LIBRARY -> "Библиотека"
         }
     } ?: return null
-    val projectName = text("Введите имя проекта") {
+    init()
+    val projectName = text("Введите имя проекта", default = otherProjects.firstOrNull()?.name) {
         require(it.length > 1) { "Имя проекта не может быть пустым" }
         require("." !in it) { "В имине проекта не допускается символ точки" }
         require(" " !in it) { "В имине проекта не допускается символ пробела" }
     } ?: return null
 
-    val packageName = text("Введите имя пакета") {
+    init()
+    val packageName = text("Введите имя пакета", default = otherProjects.firstOrNull()?.packageName) {
         require(it.length > 1) { "Имя пакета не может быть пустым" }
         require("-" !in it) { "В имине пакета не допускается символ \"-\"" }
         require(" " !in it) { "В имине пакета не допускается символ пробела" }

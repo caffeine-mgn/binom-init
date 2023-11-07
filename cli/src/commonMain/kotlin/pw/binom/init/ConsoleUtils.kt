@@ -49,7 +49,6 @@ enum class YesNoRequest {
 
 fun text(query: String, trim: Boolean = true, default: String? = null, validator: (String) -> Unit = {}): String? {
     while (true) {
-        Terminal.clear()
         print(query)
         if (default != null) {
             println(" (default: $default)")
@@ -75,7 +74,6 @@ fun text(query: String, trim: Boolean = true, default: String? = null, validator
 
 fun yesNo(text: String, default: YesNoRequest): Boolean? {
     while (true) {
-        Terminal.clear()
         print(text)
         val answerDescription = when (default) {
             YesNoRequest.DEFAULT_YES -> " (Y/n)"
