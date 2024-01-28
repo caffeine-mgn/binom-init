@@ -1,7 +1,10 @@
 package pw.binom.init
 
 import pw.binom.io.bufferedWriter
-import pw.binom.io.file.*
+import pw.binom.io.file.File
+import pw.binom.io.file.mkdirs
+import pw.binom.io.file.openWrite
+import pw.binom.io.file.relative
 import pw.binom.io.use
 
 class Project(
@@ -128,10 +131,19 @@ class Project(
                             }
                         }
 
-                        Targets.JVM -> "jvm" {
-                            "compilations.all" {
-                                +"kotlinOptions.jvmTarget = \"1.8\""
+                        Targets.JVM -> if (kind == Kind.APPLICATION) {
+                            val mainClass = if (packageName.isEmpty()) {
+                                "JvmMain"
+                            } else {
+                                "$packageName.JvmMain"
                             }
+                            "jvm" {
+                                "compilations.all" {
+                                    +"mainRun { mainClass=\"$mainClass\" }"
+                                }
+                            }
+                        } else {
+                            +"jvm()"
                         }
 
                         Targets.LINUX_X64 -> native("linuxX64")

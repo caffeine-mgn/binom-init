@@ -23,7 +23,7 @@ fun findExistProject2(searchFrom: File): File? {
     }
 }
 
-private val kotlinVersion = Version("kotlin", "1.9.20")
+private val kotlinVersion = Version("kotlin", "1.9.22")
 val shadowPlugin = Plugin.IdPlugin(
     id = "com.github.johnrengelman.shadow",
     version = Version("shadow", version = "5.2.0"),
@@ -80,18 +80,6 @@ fun createNewProject(gradleDir: File) {
     repository += Repository.MAVEN_CENTRAL
     repository += Repository.MAVEN_LOCAL
 
-//    val useBinomRepository = yesNo(
-//        text = "Использовать репозиторий repo.binom.pw?",
-//        default = YesNoRequest.DEFAULT_NO,
-//    ) ?: return
-
-//    val useLocalRepository = yesNo(
-//        text = "Использовать репозиторий mavenLocal?",
-//        default = YesNoRequest.DEFAULT_YES,
-//    ) ?: return
-//    if (useLocalRepository) {
-//        repository += Repository.MAVEN_LOCAL
-//    }
     repository += Repository.MAVEN_CENTRAL
     val project = if (multiProject) {
         Terminal.clear()

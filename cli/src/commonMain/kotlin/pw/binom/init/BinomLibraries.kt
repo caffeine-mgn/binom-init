@@ -8,13 +8,13 @@ object BinomLibraries {
     private const val group = "pw.binom.io"
     private val version = Version(family = "binom", version = "1.0.0-SNAPSHOT")
     private fun lib(name: String, plugins: List<Plugin> = emptyList()) =
-            Library(
-                    group = group,
-                    version = version,
-                    artifact = name,
-                    repository = repository,
-                    plugins = plugins,
-            )
+        Library(
+            group = group,
+            version = version,
+            artifact = name,
+            repository = repository,
+            plugins = plugins,
+        )
 
     private val atomic = lib("atomic")
     private val binomCoroutines = lib("binom-coroutines")
@@ -68,54 +68,54 @@ object BinomLibraries {
     private val xmlXsd = lib("xsd")
 
     val libs = setOf(
-            CompositLibrary(name = "Консоль", library = console, dependencies = listOf(console)),
-            CompositLibrary(name = "Колекции", library = collections, dependencies = listOf(atomic)),
-            CompositLibrary(name = "Сжатие", library = compression, dependencies = listOf(core, crc)),
-            CompositLibrary(
-                    name = "Сеть",
-                    library = network,
-                    dependencies = listOf(core, env, concurrency, thread, collections, socket),
-            ),
-            CompositLibrary(
-                    name = "Клиент Postgres",
-                    library = dbPostgresqlAsync,
-                    dependencies = listOf(db, date, network, ssl, scram),
-            ),
-            CompositLibrary(name = "Клиент Redis", library = dbRedis, dependencies = listOf(core, db, date, network)),
-            CompositLibrary(
-                    name = "Клиент Tarantool",
-                    library = dbTarantoolClient,
-                    dependencies = listOf(core, db, date, network, ssl),
-            ),
-            CompositLibrary(
-                    name = "SQLite",
-                    library = dbSqlite,
-                    dependencies = listOf(core, db, file, concurrency, thread),
-            ),
-            CompositLibrary(
-                    name = "Работа с файлами",
-                    library = file,
-                    dependencies = listOf(core, charset),
-            ),
-            CompositLibrary(
-                    name = "HTTP Сервер",
-                    library = httpServer,
-                    dependencies = listOf(core, network, ssl, http, compresscinsoln, httpClient, binomCoroutines),
-            ),
-            CompositLibrary(
-                    name = "HTTP Клиент",
-                    library = httpClient,
-                    dependencies = listOf(core, network, ssl, compression, http),
-            ),
-            CompositLibrary(
-                    name = "Логирование",
-                    library = logger,
-                    dependencies = listOf(core, date),
-            ),
-            CompositLibrary(
-                    name = "S3 клиент",
-                    library = s3,
-                    dependencies = listOf(core, httpClient, xml, date, collections, xmlSerialization),
-            ),
+        CompositLibrary(name = "Консоль", library = console, dependencies = listOf(console)),
+        CompositLibrary(name = "Колекции", library = collections, dependencies = listOf(atomic)),
+        CompositLibrary(name = "Сжатие", library = compression, dependencies = listOf(core, crc)),
+        CompositLibrary(
+            name = "Сеть",
+            library = network,
+            dependencies = listOf(core, env, concurrency, thread, collections, socket),
+        ),
+        CompositLibrary(
+            name = "Клиент Postgres",
+            library = dbPostgresqlAsync,
+            dependencies = listOf(db, date, network, ssl, scram),
+        ),
+        CompositLibrary(name = "Клиент Redis", library = dbRedis, dependencies = listOf(core, db, date, network)),
+        CompositLibrary(
+            name = "Клиент Tarantool",
+            library = dbTarantoolClient,
+            dependencies = listOf(core, db, date, network, ssl),
+        ),
+        CompositLibrary(
+            name = "SQLite",
+            library = dbSqlite,
+            dependencies = listOf(core, db, file, concurrency, thread),
+        ),
+        CompositLibrary(
+            name = "Работа с файлами",
+            library = file,
+            dependencies = listOf(core, charset),
+        ),
+        CompositLibrary(
+            name = "HTTP Сервер",
+            library = httpServer,
+            dependencies = listOf(core, network, ssl, http, compression, httpClient, binomCoroutines),
+        ),
+        CompositLibrary(
+            name = "HTTP Клиент",
+            library = httpClient,
+            dependencies = listOf(core, network, ssl, compression, http),
+        ),
+        CompositLibrary(
+            name = "Логирование",
+            library = logger,
+            dependencies = listOf(core, date),
+        ),
+        CompositLibrary(
+            name = "S3 клиент",
+            library = s3,
+            dependencies = listOf(core, httpClient, xml, date, collections, xmlSerialization),
+        ),
     )
 }
