@@ -1,10 +1,9 @@
 package pw.binom.init
 
+/*
 import pw.binom.io.bufferedWriter
 import pw.binom.io.file.File
-import pw.binom.io.file.mkdirs
 import pw.binom.io.file.openWrite
-import pw.binom.io.file.relative
 import pw.binom.io.use
 
 abstract class AbstractProject : RootProject {
@@ -13,7 +12,7 @@ abstract class AbstractProject : RootProject {
     protected abstract val kotlinVersion: Version
     protected abstract fun getAllLibs(): Collection<Library>
     protected abstract fun getAllRepositories(): Collection<Repository>
-    protected abstract val projects: Collection<Project>
+    abstract val projects: Collection<Project>
     protected val plugins by lazy {
         (projects.flatMap { it.plugins } + projects.flatMap { it.libs.flatMap { it.plugins } }).toSet()
     }
@@ -139,3 +138,4 @@ abstract class AbstractProject : RootProject {
         }
     }
 }
+*/

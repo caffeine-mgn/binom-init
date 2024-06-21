@@ -1,5 +1,5 @@
 package pw.binom.init
-
+/*
 import pw.binom.io.bufferedWriter
 import pw.binom.io.file.File
 import pw.binom.io.file.openWrite
@@ -26,3 +26,4 @@ class SingleProject(override val config: GlobalConfig, val project: Project, ove
 //        }
     }
 }
+*/

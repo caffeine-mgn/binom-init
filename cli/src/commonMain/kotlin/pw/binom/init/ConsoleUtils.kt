@@ -1,6 +1,23 @@
 package pw.binom.init
 
+import pw.binom.console.ConsoleSize
 import pw.binom.console.Terminal
+
+private fun Terminal.getWidth(): Int? {
+    val size = ConsoleSize(0, 0)
+    return if (getSize(size)) {
+        size.width
+    } else {
+        null
+    }
+}
+
+private fun printBreakLine() {
+    repeat(Terminal.getWidth() ?: 10) {
+        print("-")
+    }
+    println()
+}
 
 fun <T : Any> multiSelect(
     query: String,
@@ -21,10 +38,19 @@ fun <T : Any> multiSelect(
             }
             println(" ${toString(value)}")
         }
-        println("------")
+        println("${items.size + 1}. Выделить все")
+        printBreakLine()
         println("0. Закончить выделение")
         val txt = readlnOrNull() ?: return null
         val num = txt.toIntOrNull()
+        if (num == items.size + 1) {
+            if (items.all { it in selectedSet }) {
+                selectedSet.clear()
+            } else {
+                selectedSet.addAll(items)
+            }
+            continue
+        }
         if (num == null || num < 0 || num > items.size) {
             println("Введите значение от 0 до ${items.size}")
             continue
@@ -108,6 +134,7 @@ fun <T : Any> selector(query: String, items: List<T>, toString: (T) -> String = 
         }
         val txt = readlnOrNull() ?: return null
         val num = txt.toIntOrNull()
+        printBreakLine()
         if (num == null || num <= 0 || num > items.size) {
             println("Введите значение от 1 до ${items.size}")
             continue

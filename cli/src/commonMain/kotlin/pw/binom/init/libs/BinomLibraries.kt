@@ -1,24 +1,24 @@
-package pw.binom.init
+package pw.binom.init.libs
 
-import pw.binom.url.toURL
+import pw.binom.init.*
 
 object BinomLibraries {
 
-    val repository = Repository.UrlRepository("https://repo.binom.pw".toURL())
+
     private const val group = "pw.binom.io"
-    private val version = Version(family = "binom", version = "1.0.0-SNAPSHOT")
-    private fun lib(name: String, plugins: List<Plugin> = emptyList()) =
-        Library(
+    private val version = Version(family = "BINOM", version = "1.0.0-SNAPSHOT")
+    private fun lib(name: String, plugins: List<Plugin> = emptyList(), deps: List<Library> = emptyList()) =
+        Library.Define(
             group = group,
             version = version,
             artifact = name,
-            repository = repository,
+            repository = Repository.BINOM_REPOSITORY,
             plugins = plugins,
+            dependencies = deps,
         )
 
-    private val atomic = lib("atomic")
-    private val binomCoroutines = lib("binom-coroutines")
-    private val charset = lib("charset")
+    private val binomCoroutines = lib("coroutines")
+
     private val cleaner = lib("cleaner")
     private val collections = lib("collections")
     private val compression = lib("compression")
@@ -26,6 +26,7 @@ object BinomLibraries {
     private val crc = lib("crc")
     private val console = lib("console")
     private val core = lib("core")
+    private val charset = lib("charset", deps = listOf(core, collections))
     private val date = lib("date")
     private val db = lib("db")
     private val dbSerialization = lib("db-serialization")
@@ -38,7 +39,8 @@ object BinomLibraries {
     private val dns = lib("dns")
     private val env = lib("env")
     private val file = lib("file")
-    private val fileWatch = lib("file-watch")
+
+    //    private val fileWatch = lib("file-watch")
     private val flux = lib("flux")
     private val http = lib("http")
     private val httpClient = lib("httpClient")
@@ -69,7 +71,7 @@ object BinomLibraries {
 
     val libs = setOf(
         CompositLibrary(name = "Консоль", library = console, dependencies = listOf(console)),
-        CompositLibrary(name = "Колекции", library = collections, dependencies = listOf(atomic)),
+        CompositLibrary(name = "Колекции", library = collections, dependencies = listOf()),
         CompositLibrary(name = "Сжатие", library = compression, dependencies = listOf(core, crc)),
         CompositLibrary(
             name = "Сеть",

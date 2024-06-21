@@ -1,0 +1,31 @@
+package pw.binom.init
+
+
+enum class Target(val target: String) {
+    MINGW_X64("mingwX64"),
+    LINUX_ARM_64("linuxArm64"),
+    LINUX_64("linuxX64"),
+    MACOS_X64("macosX64"),
+    MACOS_ARM_X64("macosArm64"),
+    IOS_ARM_64("iosArm64"),
+    IOS_X64("iosX64"),
+    IOS_SIMULATOR_ARM_64("iosSimulatorArm64"),
+    TVOS_X64("tvosX64"),
+    TVOS_SIMULATOR_ARM_64("tvosSimulatorArm64"),
+    TVOS_ARM_64("tvosArm64"),
+//    WATCHOS_X86("watchosX86"),
+    WATCHOS_X64("watchosX64"),
+    WATCHOS_SIMULATOR_ARM_64("watchosSimulatorArm64"),
+    WATCHOS_DEVICE_ARM_64("watchosDeviceArm64"),
+    WATCHOS_ARM_64("watchosArm64"),
+    WATCHOS_ARM_32("watchosArm32"),
+    JVM("jvm"),
+    JS("js"),
+    WASM_JS("wasmJs"),
+    WASM_WASI("wasmWasi"),
+    ANDROID("android"),
+    ANDROID_ARM_X32("androidNativeArm32"),
+    ANDROID_ARM_X64("androidNativeArm64"),
+    ANDROID_X86("androidNativeX86"),
+    ANDROID_X64("androidNativeX64"),
+}

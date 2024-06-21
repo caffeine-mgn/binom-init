@@ -2,19 +2,27 @@ package pw.binom.init
 
 import pw.binom.io.bufferedWriter
 import pw.binom.io.file.File
-import pw.binom.io.file.mkdirs
 import pw.binom.io.file.openWrite
-import pw.binom.io.file.relative
 import pw.binom.io.use
 
 class Project(
     val name: String,
     val packageName: String,
     val kind: Kind,
-    val targets: Set<Targets>,
+    val targets: Set<Target>,
     val libs: Collection<Library>,
     val plugins: Collection<Plugin>,
 ) {
+    val allPlugins
+        get() = (libs.flatMap { it.plugins } + plugins).distinct()
+
+    val versions
+        get() = libs.filterIsInstance<Library.Define>()
+            .map { it.version }
+            .distinct()
+
+    val pluginRepositories
+        get() = plugins.mapNotNull { it.repository }.distinct()
 
     fun generate(projectDirectory: File, globalConfig: GlobalConfig?) {
         projectDirectory.mkdirs()
@@ -43,7 +51,7 @@ class Project(
 //                    .appendLine("${tab}// Your code here")
 //                    .appendLine("}")
             }
-            if (Targets.JVM in targets) {
+            if (Target.JVM in targets) {
                 val jvmSourcePath = projectDirectory.relative("src/jvmMain/kotlin").relative(packageDir)
                 jvmSourcePath.mkdirs()
                 jvmSourcePath.relative("Main.kt").openWrite().bufferedWriter().use { output ->
@@ -118,7 +126,7 @@ class Project(
                         }
                     }
                     when (it) {
-                        Targets.JS -> {
+                        Target.JS -> {
                             when (kind) {
                                 Kind.APPLICATION -> {
                                     "js(IR)" {
@@ -131,7 +139,7 @@ class Project(
                             }
                         }
 
-                        Targets.JVM -> if (kind == Kind.APPLICATION) {
+                        Target.JVM -> if (kind == Kind.APPLICATION) {
                             val mainClass = if (packageName.isEmpty()) {
                                 "JvmMain"
                             } else {
@@ -146,10 +154,7 @@ class Project(
                             +"jvm()"
                         }
 
-                        Targets.LINUX_X64 -> native("linuxX64")
-                        Targets.MINGW_X64 -> native("mingwX64")
-
-                        else -> TODO()
+                        else -> native(it.target)
                     }
                 }
 
@@ -157,8 +162,11 @@ class Project(
                     "val commonMain by getting" {
                         "dependencies" {
                             +"api(kotlin(\"stdlib\"))"
-                            libs.forEach {
-                                +"api(\"${it.group}:${it.artifact}:\${pw.binom.Versions.${it.version.constName}}\")"
+                            libs.forEach { lib ->
+                                when (lib) {
+                                    is Library.Kotlin -> lib.write(this)
+                                    is Library.Define -> lib.write(this, versionInline = false)
+                                }
                             }
                         }
                     }
@@ -170,7 +178,7 @@ class Project(
                     }
                 }
             }
-            if (kind == Kind.APPLICATION && Targets.JVM in targets) {
+            if (kind == Kind.APPLICATION && Target.JVM in targets) {
                 val mainClass = if (packageName.isEmpty()) {
                     "JvmMain"
                 } else {

@@ -1,13 +1,11 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
+import org.jetbrains.kotlin.konan.target.Family
+import pw.binom.ResourcePackerTask
 
 plugins {
-    kotlin("multiplatform") version "1.9.22"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-}
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven(url = "https://repo.binom.pw")
+    kotlin("multiplatform")
+//    id("com.github.johnrengelman.shadow")
 }
 
 val nativeEntryPoint = "pw.binom.init.main"
@@ -19,6 +17,8 @@ fun KotlinNativeTarget.configNative() {
         }
     }
 }
+
+val binomIoVersion = project.property("binom.io.version")
 
 kotlin {
     linuxX64 {
@@ -36,41 +36,85 @@ kotlin {
     macosArm64 {
         configNative()
     }
-    jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-    }
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(kotlin("stdlib"))
-                api("pw.binom.io:file:1.0.0-SNAPSHOT")
-                api("pw.binom.io:console:1.0.0-SNAPSHOT")
-            }
+        commonMain.dependencies {
+            implementation(kotlin("stdlib"))
+            api("pw.binom.io:file:$binomIoVersion")
+            api("pw.binom.io:httpClient:$binomIoVersion")
+            api("pw.binom.io:console:$binomIoVersion")
         }
     }
 }
-
 tasks {
-    val jvmJar by getting(Jar::class)
-
-    val shadowJar by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
-        from(jvmJar.archiveFile)
-        group = "build"
-        configurations = listOf(project.configurations["jvmRuntimeClasspath"])
-        exclude(
-            "META-INF/*.SF",
-            "META-INF/*.DSA",
-            "META-INF/*.RSA",
-            "META-INF/*.txt",
-            "META-INF/NOTICE",
-            "LICENSE",
-        )
-        manifest {
-            attributes("Main-Class" to "pw.binom.init.JvmMain")
+    withType(KotlinNativeLink::class.java).onEach { target ->
+        if (target.processTests) {
+            return@onEach
         }
+        val prefix = if (target.debuggable) {
+            "Debug"
+        } else {
+            "Release"
+        }
+        val appendResourceTask =
+            register("appendResources-$prefix-${target.binary.target.konanTarget.name}", ResourcePackerTask::class.java)
+        appendResourceTask.configure {
+            dependsOn(target)
+            resource(
+                file = rootProject.file("gradlew"),
+                name = "gradlew",
+            )
+            resource(
+                file = rootProject.file("gradlew.bat"),
+                name = "gradlew.bat",
+            )
+            resource(
+                file = rootProject.file("gradle/wrapper/gradle-wrapper.jar"),
+                name = "gradle-wrapper.jar",
+            )
+            inputBinaryFile.set(target.binary.outputFile)
+            val name = "full-${target.binary.outputFile.name}"
+            outputBinaryFile.set(target.binary.outputFile.parentFile.resolve(name))
+            gradleWrapperJar.set(rootProject.rootDir.resolve("gradle/wrapper/gradle-wrapper.jar"))
+        }
+
+        val installTask = register("install$prefix-${target.binary.target.konanTarget.name}", Copy::class)
+
+        installTask.configure {
+            group = "install"
+            dependsOn(appendResourceTask)
+            from(appendResourceTask.get().outputBinaryFile)
+            into("${System.getProperty("user.home")}/.bin")
+            val suffix = if (target.binary.target.konanTarget.family == Family.MINGW) {
+                ".exe"
+            } else {
+                ""
+            }
+            rename { "binom-init$suffix" }
+            val outFile = File("${System.getProperty("user.home")}/.bin/binom-init$suffix")
+            doLast {
+                outFile.setExecutable(true)
+            }
+        }
+
     }
+//    val jvmJar by getting(Jar::class)
+
+//    val shadowJar by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+//        from(jvmJar.archiveFile)
+//        group = "build"
+//        configurations = listOf(project.configurations["jvmRuntimeClasspath"])
+//        exclude(
+//            "META-INF/*.SF",
+//            "META-INF/*.DSA",
+//            "META-INF/*.RSA",
+//            "META-INF/*.txt",
+//            "META-INF/NOTICE",
+//            "LICENSE",
+//        )
+//        manifest {
+//            attributes("Main-Class" to "pw.binom.init.JvmMain")
+//        }
+//    }
 
     val linkReleaseExecutableLinuxX64 by getting
     val linkReleaseExecutableMingwX64 by getting
