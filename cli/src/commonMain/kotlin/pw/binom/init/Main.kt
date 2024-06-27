@@ -207,7 +207,7 @@ fun createNewProject(gradleDir: File) {
 }
 
 fun generateSource(project: Project, projectDir: File) {
-    val mainDir = projectDir.relative("src/commonMain").relative(project.packageName.replace('.', File.SEPARATOR))
+    val mainDir = projectDir.relative("src/commonMain/kotlin").relative(project.packageName.replace('.', File.SEPARATOR))
     mainDir.mkdirs()
     if (project.kind == Kind.APPLICATION) {
         mainDir.relative("Main.kt").writer {
