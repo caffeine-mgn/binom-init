@@ -8,12 +8,12 @@ import pw.binom.io.use
 fun File.copyInto(dest: File) {
     ByteBuffer(DEFAULT_BUFFER_SIZE).use { buffer ->
         openRead().use { input ->
-            dest.parent?.mkdirs()
+            dest.parent.mkdirs()
             dest.openWrite().use { output ->
                 while (true) {
                     buffer.clear()
                     val l = input.read(buffer)
-                    if (l <= 0) {
+                    if (l.isNotAvailable) {
                         break
                     }
                     buffer.flip()

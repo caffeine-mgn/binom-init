@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "2.1.0"
     id("com.github.gmazzo.buildconfig") version "3.0.3"
 }
 
@@ -43,7 +43,7 @@ dependencies {
 //    api("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
 //    api("org.jetbrains.compose:compose-gradle-plugin:$composeVersion")
 //    api("pw.binom.static-css:plugin:$staticCssVersion")
-    api("pw.binom:binom-publish:0.1.20")
+    api("pw.binom:binom-publish:0.1.23")
 //    api("com.bmuschko:gradle-docker-plugin:6.4.0")
 //    api("org.hidetake:core:2.11.2")
 //    api("org.hidetake:groovy-ssh:2.11.2")

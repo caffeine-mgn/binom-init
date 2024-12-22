@@ -4,9 +4,16 @@ import pw.binom.init.*
 
 object BinomLibraries {
 
-
+    private val internalLibs = ArrayList<Library.Define>()
+    val libs: List<Library.Define>
+        get() = internalLibs
     private const val group = "pw.binom.io"
+    private val binomPublicationVersion = Version("binomPublication", "0.1.23")
     private val version = Version(family = "BINOM", version = "1.0.0-SNAPSHOT")
+    val binomPublicationPlugin = Plugin.IdPlugin(
+        id = "pw.binom.publish",
+        version = binomPublicationVersion,
+    )
     private fun lib(name: String, plugins: List<Plugin> = emptyList(), deps: List<Library> = emptyList()) =
         Library.Define(
             group = group,
@@ -15,10 +22,11 @@ object BinomLibraries {
             repository = Repository.BINOM_REPOSITORY,
             plugins = plugins,
             dependencies = deps,
-        )
+        ).also {
+            internalLibs += it
+        }
 
     private val binomCoroutines = lib("coroutines")
-
     private val cleaner = lib("cleaner")
     private val collections = lib("collections")
     private val compression = lib("compression")
@@ -26,7 +34,7 @@ object BinomLibraries {
     private val crc = lib("crc")
     private val console = lib("console")
     private val core = lib("core")
-    private val charset = lib("charset", deps = listOf(core, collections))
+    private val charset = lib("charset")
     private val date = lib("date")
     private val db = lib("db")
     private val dbSerialization = lib("db-serialization")
@@ -40,8 +48,6 @@ object BinomLibraries {
     private val env = lib("env")
     private val file = lib("file")
 
-    //    private val fileWatch = lib("file-watch")
-    private val flux = lib("flux")
     private val http = lib("http")
     private val httpClient = lib("httpClient")
     private val httpServer = lib("httpServer")
@@ -68,56 +74,57 @@ object BinomLibraries {
     private val xml = lib("xml")
     private val xmlSerialization = lib("xml-serialization")
     private val xmlXsd = lib("xsd")
-
-    val libs = setOf(
-        CompositLibrary(name = "Консоль", library = console, dependencies = listOf(console)),
-        CompositLibrary(name = "Колекции", library = collections, dependencies = listOf()),
-        CompositLibrary(name = "Сжатие", library = compression, dependencies = listOf(core, crc)),
-        CompositLibrary(
-            name = "Сеть",
-            library = network,
-            dependencies = listOf(core, env, concurrency, thread, collections, socket),
-        ),
-        CompositLibrary(
-            name = "Клиент Postgres",
-            library = dbPostgresqlAsync,
-            dependencies = listOf(db, date, network, ssl, scram),
-        ),
-        CompositLibrary(name = "Клиент Redis", library = dbRedis, dependencies = listOf(core, db, date, network)),
-        CompositLibrary(
-            name = "Клиент Tarantool",
-            library = dbTarantoolClient,
-            dependencies = listOf(core, db, date, network, ssl),
-        ),
-        CompositLibrary(
-            name = "SQLite",
-            library = dbSqlite,
-            dependencies = listOf(core, db, file, concurrency, thread),
-        ),
-        CompositLibrary(
-            name = "Работа с файлами",
-            library = file,
-            dependencies = listOf(core, charset),
-        ),
-        CompositLibrary(
-            name = "HTTP Сервер",
-            library = httpServer,
-            dependencies = listOf(core, network, ssl, http, compression, httpClient, binomCoroutines),
-        ),
-        CompositLibrary(
-            name = "HTTP Клиент",
-            library = httpClient,
-            dependencies = listOf(core, network, ssl, compression, http),
-        ),
-        CompositLibrary(
-            name = "Логирование",
-            library = logger,
-            dependencies = listOf(core, date),
-        ),
-        CompositLibrary(
-            name = "S3 клиент",
-            library = s3,
-            dependencies = listOf(core, httpClient, xml, date, collections, xmlSerialization),
-        ),
-    )
+    /*
+        val libs = setOf(
+    //        CompositLibrary(name = "Консоль", library = console, dependencies = listOf(console)),
+            CompositLibrary(name = "Коллекции", library = collections, dependencies = listOf()),
+            CompositLibrary(name = "Сжатие", library = compression, dependencies = listOf(core, crc)),
+            CompositLibrary(
+                name = "Сеть",
+                library = network,
+                dependencies = listOf(core, env, concurrency, thread, collections, socket),
+            ),
+            CompositLibrary(
+                name = "Клиент Postgres",
+                library = dbPostgresqlAsync,
+                dependencies = listOf(db, date, network, ssl, scram),
+            ),
+            CompositLibrary(name = "Клиент Redis", library = dbRedis, dependencies = listOf(core, db, date, network)),
+            CompositLibrary(
+                name = "Клиент Tarantool",
+                library = dbTarantoolClient,
+                dependencies = listOf(core, db, date, network, ssl),
+            ),
+            CompositLibrary(
+                name = "SQLite",
+                library = dbSqlite,
+                dependencies = listOf(core, db, file, concurrency, thread),
+            ),
+            CompositLibrary(
+                name = "Работа с файлами",
+                library = file,
+                dependencies = listOf(core, charset),
+            ),
+            CompositLibrary(
+                name = "HTTP Сервер",
+                library = httpServer,
+                dependencies = listOf(core, network, ssl, http, compression, httpClient, binomCoroutines),
+            ),
+            CompositLibrary(
+                name = "HTTP Клиент",
+                library = httpClient,
+                dependencies = listOf(core, network, ssl, compression, http),
+            ),
+            CompositLibrary(
+                name = "Логирование",
+                library = logger,
+                dependencies = listOf(core, date),
+            ),
+            CompositLibrary(
+                name = "S3 клиент",
+                library = s3,
+                dependencies = listOf(core, httpClient, xml, date, collections, xmlSerialization),
+            ),
+        )
+        */
 }

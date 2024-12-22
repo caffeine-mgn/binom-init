@@ -8,6 +8,7 @@ sealed interface Repository {
         val MAVEN_LOCAL = StandardRepository("mavenLocal")
         val MAVEN_CENTRAL = StandardRepository("mavenCentral")
         val GRADLE_PLUGIN_PORTAL = StandardRepository("gradlePluginPortal")
+        val GOOGLE = StandardRepository("google")
         val BINOM_REPOSITORY = UrlRepository("https://repo.binom.pw".toURL())
     }
 

@@ -12,7 +12,5 @@ object AtomicLibrary {
         version = version,
         artifact = "atomic",
         repository = Repository.BINOM_REPOSITORY,
-        plugins = emptyList(),
-        dependencies = emptyList(),
     )
 }

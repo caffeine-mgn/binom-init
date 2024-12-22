@@ -21,13 +21,13 @@ sealed interface Library {
         val artifact: String,
         val version: Version,
         override val repository: Repository,
-        override val plugins: List<Plugin>,
-        val dependencies: List<Library>
+        override val plugins: List<Plugin> = emptyList(),
+        val dependencies: List<Library> = emptyList()
     ) : Library {
         fun write(writer: Writer, versionInline: Boolean) {
             writer {
-                val ver = if (versionInline) version.version else version.variableName
-                +"api(\"${group}:${artifact}:\$$ver\")"
+                val ver = if (versionInline) version.version else "\$${version.variableName}"
+                +"api(\"${group}:${artifact}:$ver\")"
             }
         }
     }

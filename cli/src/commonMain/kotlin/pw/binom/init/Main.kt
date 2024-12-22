@@ -2,8 +2,10 @@ package pw.binom.init
 
 import pw.binom.Environment
 import pw.binom.OS
+import com.jakewharton.mosaic.runMosaicBlocking
 import pw.binom.console.Terminal
 import pw.binom.init.libs.BinomLibraries
+import pw.binom.init.libs.Kotlin
 import pw.binom.io.bufferedWriter
 import pw.binom.io.file.*
 import pw.binom.io.use
@@ -27,27 +29,74 @@ fun findExistProject2(searchFrom: File): File? {
     }
 }
 
-private val kotlinVersion = Version("kotlin", "1.9.24")
-private val binomPublicationVersion = Version("binomPublication", "0.1.20")
+
 val shadowPlugin = Plugin.IdPlugin(
     id = "com.github.johnrengelman.shadow",
     version = Version("shadow", version = "5.2.0"),
 )
-val kotlinMultiplatformPlugin = Plugin.KotlinPlugin(
-    name = "multiplatform",
-    version = kotlinVersion,
-    embedded = false,
-)
-val kotlinSerializationPlugin = Plugin.IdPlugin(
-    id = "kotlinx-serialization",
-    version = kotlinVersion,
-)
-val binomPublicationPlugin = Plugin.IdPlugin(
-    id = "pw.binom.publish",
-    version = binomPublicationVersion,
-)
+
+//val binomPublicationPlugin = Plugin.IdPlugin(
+//    id = "pw.binom.publish",
+//    version = binomPublicationVersion,
+//)
 
 fun main(args: Array<String>) {
+    val rootDirectory = Environment.workDirectoryFile
+    val multiProject = yesNo(
+        text = "Мультимодульный проект?",
+        default = YesNoRequest.DEFAULT_NO,
+    ) ?: return
+
+
+    val project = if (multiProject) {
+        val projects = HashMap<ProjectName, KotlinProject>()
+        do {
+
+            val projectName = text("Введите имя проекта") {
+                require(it.length > 1) { "Имя проекта не может быть пустым" }
+                require("." !in it) { "В имине проекта не допускаются точки" }
+                require(" " !in it) { "В имине проекта не допускаются пробелы" }
+                require(":" !in it) { "В имине проекта не допускаются двоеточие" }
+                require("\\" !in it) { "В имине проекта не допускаются обратный слеш" }
+//            require(!otherProjects.any { o -> o.name == it }) { "Проект с таким именем уже существует" }
+            } ?: return
+            projects[ProjectName(projectName)] = ProjectReader.read() ?: return
+            val createMore = yesNo(text = "Создать еще проект?", default = YesNoRequest.DEFAULT_NO) ?: return
+            if (!createMore) {
+                break
+            }
+        } while (true)
+        MainProject(
+            projects = projects,
+        )
+    } else {
+        ProjectReader.read() ?: return
+    }
+
+    project.generate(
+        name = rootDirectory.name,
+        file = rootDirectory,
+    )
+
+
+    val wrapperDir = rootDirectory.relative("gradle/wrapper")
+    wrapperDir.mkdirs()
+    GradleResources.unpackGradleWrapper(wrapperDir.relative("gradle-wrapper.jar"))
+    GradleResources.unpackGradlewBat(rootDirectory.relative("gradlew.bat"))
+    val destGradlew = rootDirectory.relative("gradlew")
+    GradleResources.unpackGradlew(destGradlew)
+    if (Environment.os == OS.LINUX || Environment.os == OS.MACOS) {
+        destGradlew.takeIfExist()?.setPosixMode(
+            destGradlew.getPosixMode()
+                .withOwnerExecute()
+        )
+    }
+
+    wrapperDir.relative("gradle-wrapper.properties").openWrite().bufferedWriter().use {
+        it.append(GradleResources.gradleWrapperProperties("8.12"))
+    }
+    /*
+    return
     val rootDir = File(Environment.userDirectory).relative(".binom-init")
     val gradleDir = rootDir.relative("gradle")
 
@@ -57,8 +106,10 @@ fun main(args: Array<String>) {
     } else {
         createNewProject(gradleDir = gradleDir)
     }
+    */
 }
 
+/*
 fun addSubProject(projectDirection: File) {
     if (yesNo(
             text = "Добавить новый подпроект в \"$projectDirection\"?",
@@ -77,7 +128,7 @@ fun addSubProject(projectDirection: File) {
         }
     }
 }
-
+*/
 fun File.writer(func: (Writer) -> Unit) {
     openWrite().bufferedWriter().use { writer ->
         writer.write {
@@ -92,7 +143,7 @@ fun readGroup(default: String?): String? = text("Введите группу п�
     require(it[0] != '.') { "Группа не должна начинаться с точки" }
     require(it.last() != '.') { "Группа не должна заканчиваться на точку" }
 }
-
+/*
 fun createNewProject(gradleDir: File) {
     val rootDirectory = Environment.workDirectoryFile
     val wrapperDir = rootDirectory.relative("gradle/wrapper")
@@ -207,7 +258,8 @@ fun createNewProject(gradleDir: File) {
 }
 
 fun generateSource(project: Project, projectDir: File) {
-    val mainDir = projectDir.relative("src/commonMain/kotlin").relative(project.packageName.replace('.', File.SEPARATOR))
+    val mainDir =
+        projectDir.relative("src/commonMain/kotlin").relative(project.packageName.replace('.', File.SEPARATOR))
     mainDir.mkdirs()
     if (project.kind == Kind.APPLICATION) {
         mainDir.relative("Main.kt").writer {
@@ -261,7 +313,7 @@ fun readProject(otherProjects: List<Project>, defaultGroup: String?): Project? {
         items = Target.entries,
     ) ?: return null
     val plugins = HashSet<Plugin>()
-    plugins += kotlinMultiplatformPlugin
+    plugins += Kotlin.kotlinMultiplatformPlugin
     return Project(
         name = projectName,
         packageName = packageName,
@@ -271,3 +323,4 @@ fun readProject(otherProjects: List<Project>, defaultGroup: String?): Project? {
         plugins = plugins,
     )
 }
+*/

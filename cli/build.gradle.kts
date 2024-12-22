@@ -1,50 +1,45 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import org.jetbrains.kotlin.konan.target.Family
 import pw.binom.ResourcePackerTask
 
 plugins {
     kotlin("multiplatform")
+//    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
+    kotlin("plugin.compose") version "2.1.0"
 //    id("com.github.johnrengelman.shadow")
-}
-
-val nativeEntryPoint = "pw.binom.init.main"
-
-fun KotlinNativeTarget.configNative() {
-    binaries {
-        executable {
-            entryPoint = nativeEntryPoint
-        }
-    }
 }
 
 val binomIoVersion = project.property("binom.io.version")
 
 kotlin {
-    linuxX64 {
-        configNative()
-    }
-    linuxArm64 {
-        configNative()
-    }
-    mingwX64 {
-        configNative()
-    }
-    macosX64 {
-        configNative()
-    }
-    macosArm64 {
-        configNative()
-    }
+    linuxX64()
+    linuxArm64()
+    mingwX64()
+    macosX64()
+    macosArm64()
     sourceSets {
         commonMain.dependencies {
             implementation(kotlin("stdlib"))
             api("pw.binom.io:file:$binomIoVersion")
             api("pw.binom.io:httpClient:$binomIoVersion")
             api("pw.binom.io:console:$binomIoVersion")
+            implementation("com.jakewharton.mosaic:mosaic-runtime:0.14.0")
+        }
+    }
+    targets.withType(KotlinNativeTarget::class.java).configureEach {
+        binaries.executable {
+            entryPoint = "pw.binom.init.main"
+            if (buildType == NativeBuildType.DEBUG) {
+                linkTaskProvider.configure {
+//                    enabled = false
+                }
+            }
         }
     }
 }
+
 tasks {
     withType(KotlinNativeLink::class.java).onEach { target ->
         if (target.processTests) {
@@ -97,24 +92,6 @@ tasks {
         }
 
     }
-//    val jvmJar by getting(Jar::class)
-
-//    val shadowJar by creating(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
-//        from(jvmJar.archiveFile)
-//        group = "build"
-//        configurations = listOf(project.configurations["jvmRuntimeClasspath"])
-//        exclude(
-//            "META-INF/*.SF",
-//            "META-INF/*.DSA",
-//            "META-INF/*.RSA",
-//            "META-INF/*.txt",
-//            "META-INF/NOTICE",
-//            "LICENSE",
-//        )
-//        manifest {
-//            attributes("Main-Class" to "pw.binom.init.JvmMain")
-//        }
-//    }
 
     val linkReleaseExecutableLinuxX64 by getting
     val linkReleaseExecutableMingwX64 by getting

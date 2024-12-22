@@ -1,5 +1,18 @@
 package pw.binom.init
 
+import pw.binom.io.use
+
+fun pw.binom.io.Writer.useWrite(func: Writer.() -> Unit) {
+    use { writer ->
+        func(
+            Writer(
+                tabCount = 0,
+                output = writer,
+            ),
+        )
+    }
+}
+
 fun Appendable.write(func: Writer.() -> Unit) {
     func(
         Writer(
