@@ -1,8 +1,6 @@
 package pw.binom.init
 
-import pw.binom.init.libs.BinomLibraries
-import pw.binom.init.libs.Kotlin
-import pw.binom.init.libs.UUIDLibrary
+import pw.binom.init.libs.*
 
 object ProjectReader {
     fun read(): KotlinProject? {
@@ -15,8 +13,8 @@ object ProjectReader {
 
         val selected = multiSelect(
             query = "Какие библиотеки добавить?",
-            items = BinomLibraries.libs + UUIDLibrary.libs,
-            toString = { "${it.group}:${it.artifact}" },
+            items = BinomLibraries.libs + UUIDLibrary.libs + Kotlin.libs + CliLibrary.libs + AtomicLibrary.libs,
+            toString = { "${it.group}:${it.artifact}${it.description?.let { " $it" }}" },
         ) ?: return null
 
         val targets = multiSelect(
@@ -26,8 +24,8 @@ object ProjectReader {
 
         return KotlinProject(
             kind = kind,
-            libs = selected,
-            plugins = listOf(Kotlin.kotlinMultiplatformPlugin),
+            libs = selected + listOf(Kotlin.stdLib),
+            plugins = emptyList(),
             targets = targets,
         )
     }

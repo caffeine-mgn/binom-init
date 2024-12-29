@@ -39,7 +39,7 @@ sealed interface Plugin {
             val sb = StringBuilder()
             sb.append("id(\"").append(id).append("\")")
             if (withVersion) {
-                sb.append(" version pw.binom.Versions.").append(version.constName)
+                sb.append(" version \"").append(version.version).append("\"")
             }
             if (!apply) {
                 sb.append(" apply false")

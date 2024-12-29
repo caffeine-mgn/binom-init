@@ -27,7 +27,8 @@ object UUIDLibrary {
         artifact = "uuid-serialization",
         repository = Repository.BINOM_REPOSITORY,
         plugins = listOf(Kotlin.kotlinSerializationPlugin),
-        dependencies = emptyList(),
+        dependencies = listOf(uuid),
+        category = Category.SERIALIZATION,
     ).also {
         internalLibs += it
     }

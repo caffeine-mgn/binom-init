@@ -7,7 +7,7 @@ sealed interface Library {
     data class Kotlin(
         val name: String,
         override val repository: Repository,
-        override val plugins: List<Plugin>
+        override val plugins: List<Plugin>,
     ) : Library {
         fun write(writer: Writer) {
             writer {
@@ -22,7 +22,9 @@ sealed interface Library {
         val version: Version,
         override val repository: Repository,
         override val plugins: List<Plugin> = emptyList(),
-        val dependencies: List<Library> = emptyList()
+        val dependencies: List<Library> = emptyList(),
+        val description: String? = null,
+        val category: Category = Category.OTHER,
     ) : Library {
         fun write(writer: Writer, versionInline: Boolean) {
             writer {
