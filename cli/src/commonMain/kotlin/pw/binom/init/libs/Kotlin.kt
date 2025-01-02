@@ -49,7 +49,8 @@ object Kotlin {
     val stdLib = Library.Kotlin(
         name = "stdlib",
         repository = Repository.MAVEN_CENTRAL,
-        plugins = listOf(kotlinMultiplatformPlugin)
+        plugins = listOf(kotlinMultiplatformPlugin),
+        runtime = Library.Runtime.MAIN,
     )
     val serializationVersion = Version("kotlin_serialization", "1.7.3")
     val kamlSerializationVersion = Version("kaml_serialization", "0.66.0")

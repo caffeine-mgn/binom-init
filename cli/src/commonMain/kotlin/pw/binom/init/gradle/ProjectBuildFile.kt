@@ -26,11 +26,26 @@ object ProjectBuildFile {
                     }
                     if (libs.isNotEmpty()) {
                         "sourceSets" {
-                            "commonMain.dependencies" {
-                                libs.forEach {
-                                    when (it) {
-                                        is Library.Kotlin -> it.write(writer = this)
-                                        is Library.Define -> it.write(writer = this, versionInline = true)
+                            val main = libs.filter { it.runtime == Library.Runtime.MAIN }
+                            val test = libs.filter { it.runtime == Library.Runtime.TEST }
+                            if (main.isNotEmpty()) {
+                                "commonMain.dependencies" {
+                                    main.forEach {
+                                        when (it) {
+                                            is Library.Kotlin -> it.write(writer = this)
+                                            is Library.Define -> it.write(writer = this, versionInline = true)
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (test.isNotEmpty()) {
+                                "commonTest.dependencies" {
+                                    test.forEach {
+                                        when (it) {
+                                            is Library.Kotlin -> it.write(writer = this)
+                                            is Library.Define -> it.write(writer = this, versionInline = true)
+                                        }
                                     }
                                 }
                             }

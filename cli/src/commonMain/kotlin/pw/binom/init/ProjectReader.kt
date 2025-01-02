@@ -14,7 +14,7 @@ object ProjectReader {
         val selected = multiSelect(
             query = "Какие библиотеки добавить?",
             items = BinomLibraries.libs + UUIDLibrary.libs + Kotlin.libs + CliLibrary.libs + AtomicLibrary.libs,
-            toString = { "${it.group}:${it.artifact}${it.description?.let { " $it" }}" },
+            toString = { "${it.group}:${it.artifact}${it.description?.let { " $it" } ?: ""}" },
         ) ?: return null
 
         val targets = multiSelect(

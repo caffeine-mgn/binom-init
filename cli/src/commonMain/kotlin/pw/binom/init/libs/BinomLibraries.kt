@@ -75,6 +75,9 @@ object BinomLibraries {
     private val ssl = lib("ssl")
     private val strong = lib("strong")
     private val strongProperties = lib("strong-properties")
+    private val strongPropertiesIni = lib("strong-properties-ini")
+    private val strongPropertiesYaml = lib("strong-properties-yaml")
+    private val strongWebServer = lib("strong-web-server")
     private val thread = lib("thread")
     private val url = lib("url")
 
